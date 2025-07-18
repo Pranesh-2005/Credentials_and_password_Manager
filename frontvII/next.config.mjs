@@ -1,14 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
+  output: 'standalone',
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
   },
-  typescript: {
-    ignoreBuildErrors: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
   },
-  images: {
-    unoptimized: true,
-  },
+  // Ensure static files are handled correctly
+  trailingSlash: false,
+  // Fix for Vercel deployment
+  generateEtags: false,
+  poweredByHeader: false,
 }
 
-export default nextConfig
+module.exports = nextConfig
