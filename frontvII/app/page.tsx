@@ -151,10 +151,13 @@ export default function SecureVault() {
     }
   }
 
-  const saveVaultData = async () => {
+  const saveVaultData = async (infoOverride?: InfoItem[], credsOverride?: Credential[]) => {
     if (!masterKey) return
 
     setIsSaving(true)
+
+    const infoToSave = infoOverride ?? information
+    const credsToSave = credsOverride ?? credentials
 
     try {
       const vaultData: VaultData = {
@@ -163,13 +166,11 @@ export default function SecureVault() {
         credentials: [],
       }
 
-      // Encrypt and store information
-      information.forEach((item) => {
+      infoToSave.forEach((item) => {
         vaultData.information[item.name] = encrypt(item.value, masterKey)
       })
 
-      // Encrypt and store credentials
-      vaultData.credentials = credentials.map((cred) => ({
+      vaultData.credentials = credsToSave.map((cred) => ({
         site: cred.site,
         user: encrypt(cred.user, masterKey),
         pass: encrypt(cred.pass, masterKey),
@@ -401,8 +402,7 @@ export default function SecureVault() {
     setNewInfo({ name: "", value: "" })
     setIsAddInfoOpen(false)
 
-    // Only save to vault file, don't export
-    await saveVaultData()
+    await saveVaultData(newInformation, credentials)
 
     toast({
       title: "Success",
@@ -426,8 +426,7 @@ export default function SecureVault() {
     setNewCred({ site: "", user: "", pass: "" })
     setIsAddCredOpen(false)
 
-    // Only save to vault file, don't export
-    await saveVaultData()
+    await saveVaultData(information, newCredentials)
 
     toast({
       title: "Success",
@@ -439,7 +438,7 @@ export default function SecureVault() {
     const newInformation = information.filter((_, i) => i !== index)
     setInformation(newInformation)
 
-    await saveVaultData()
+    await saveVaultData(newInformation, credentials)
 
     toast({
       title: "Success",
@@ -451,7 +450,7 @@ export default function SecureVault() {
     const newCredentials = credentials.filter((_, i) => i !== index)
     setCredentials(newCredentials)
 
-    await saveVaultData()
+    await saveVaultData(information, newCredentials)
 
     toast({
       title: "Success",
@@ -468,7 +467,7 @@ export default function SecureVault() {
 
     setEditingInfo(null)
 
-    await saveVaultData()
+    await saveVaultData(newInformation, credentials)
 
     toast({
       title: "Success",
@@ -485,7 +484,7 @@ export default function SecureVault() {
 
     setEditingCred(null)
 
-    await saveVaultData()
+    await saveVaultData(information, newCredentials)
 
     toast({
       title: "Success",
@@ -641,7 +640,7 @@ export default function SecureVault() {
                 <p className="text-gray-600 text-sm sm:text-base">Your encrypted personal data manager</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-2 flex-wrap">
               <Button
                 variant="outline"
                 onClick={() => saveVaultData()}
